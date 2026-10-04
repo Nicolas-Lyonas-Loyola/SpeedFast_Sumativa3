@@ -133,10 +133,22 @@ public class PanelEntregas extends JPanel {
         JButton btnLimpiar =
                 new JButton("Limpiar");
 
+        JButton btnFiltrarPedido =
+                new JButton("Filtrar por Pedido");
+
+        JButton btnFiltrarRepartidor =
+                new JButton("Filtrar por Repartidor");
+
+        JButton btnMostrarTodas =
+                new JButton("Mostrar todas");
+
         panelBotones.add(btnGuardar);
         panelBotones.add(btnActualizar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnLimpiar);
+        panelBotones.add(btnFiltrarPedido);
+        panelBotones.add(btnFiltrarRepartidor);
+        panelBotones.add(btnMostrarTodas);
 
         panelSuperior.add(
                 panelCampos,
@@ -209,6 +221,18 @@ public class PanelEntregas extends JPanel {
                 e -> limpiarFormulario()
         );
 
+        btnFiltrarPedido.addActionListener(
+                e -> filtrarPorPedido()
+        );
+
+        btnFiltrarRepartidor.addActionListener(
+                e -> filtrarPorRepartidor()
+        );
+
+        btnMostrarTodas.addActionListener(
+                e -> cargarTabla()
+        );
+
         tablaEntregas
                 .getSelectionModel()
                 .addListSelectionListener(e -> {
@@ -220,6 +244,7 @@ public class PanelEntregas extends JPanel {
 
         refrescarDatos();
     }
+
 
     /**
      * Refresca la información relacionada desde MySQL.
@@ -253,15 +278,26 @@ public class PanelEntregas extends JPanel {
     }
 
     /**
-     * Recupera las entregas desde la BD
-     * y actualiza el JTable.
+     * Recupera todas las entregas desde la BD.
      */
     private void cargarTabla() {
+
+        mostrarEntregas(
+                entregaDAO.readAll()
+        );
+    }
+
+    /**
+     * Muestra en el JTable la lista de entregas recibida.
+     */
+    private void mostrarEntregas(
+            List<Entrega> entregas
+    ) {
 
         modeloTabla.setRowCount(0);
 
         entregasActuales =
-                entregaDAO.readAll();
+                new ArrayList<>(entregas);
 
         List<Pedido> pedidos =
                 pedidoDAO.readAll();
@@ -648,7 +684,73 @@ public class PanelEntregas extends JPanel {
             return null;
         }
     }
+    /**
+     * Muestra solo las entregas asociadas
+     * al pedido seleccionado.
+     */
+    private void filtrarPorPedido() {
 
+        Pedido pedido =
+                (Pedido) cmbPedido.getSelectedItem();
+
+        if (pedido == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Selecciona un pedido para filtrar.",
+                    "Validación",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        List<Entrega> filtradas =
+                entregaDAO.readAll()
+                        .stream()
+                        .filter(
+                                entrega ->
+                                        entrega.getIdPedido()
+                                                == pedido.getId()
+                        )
+                        .toList();
+
+        mostrarEntregas(filtradas);
+    }
+
+    /**
+     * Muestra solo las entregas asociadas
+     * al repartidor seleccionado.
+     */
+    private void filtrarPorRepartidor() {
+
+        Repartidor repartidor =
+                (Repartidor) cmbRepartidor.getSelectedItem();
+
+        if (repartidor == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Selecciona un repartidor para filtrar.",
+                    "Validación",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        List<Entrega> filtradas =
+                entregaDAO.readAll()
+                        .stream()
+                        .filter(
+                                entrega ->
+                                        entrega.getIdRepartidor()
+                                                == repartidor.getId()
+                        )
+                        .toList();
+
+        mostrarEntregas(filtradas);
+    }
     private Pedido buscarPedido(
             int id,
             List<Pedido> pedidos

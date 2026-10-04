@@ -34,6 +34,7 @@ public class PanelRepartidores extends JPanel {
         repartidorDAO = new RepartidorDAOImpl();
 
         setLayout(new BorderLayout(10, 10));
+
         setBorder(
                 BorderFactory.createEmptyBorder(
                         15,
@@ -54,7 +55,8 @@ public class PanelRepartidores extends JPanel {
                 new JLabel("Nombre:")
         );
 
-        txtNombre = new JTextField(25);
+        txtNombre =
+                new JTextField(25);
 
         panelFormulario.add(txtNombre);
 
@@ -75,7 +77,10 @@ public class PanelRepartidores extends JPanel {
         panelFormulario.add(btnEliminar);
         panelFormulario.add(btnLimpiar);
 
-        add(panelFormulario, BorderLayout.NORTH);
+        add(
+                panelFormulario,
+                BorderLayout.NORTH
+        );
 
         // -------------------------------------------------
         // TABLA
@@ -136,7 +141,6 @@ public class PanelRepartidores extends JPanel {
                     }
                 });
 
-        // Carga inicial desde MySQL.
         cargarTabla();
     }
 
@@ -164,24 +168,14 @@ public class PanelRepartidores extends JPanel {
 
     /**
      * Registra un nuevo repartidor después
-     * de validar el campo obligatorio.
+     * de validar el nombre.
      */
     private void guardarRepartidor() {
 
         String nombre =
                 txtNombre.getText().trim();
 
-        if (nombre.isEmpty()) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "El nombre del repartidor es obligatorio.",
-                    "Validación",
-                    JOptionPane.WARNING_MESSAGE
-            );
-
-            txtNombre.requestFocus();
-
+        if (!validarNombre(nombre)) {
             return;
         }
 
@@ -215,8 +209,7 @@ public class PanelRepartidores extends JPanel {
     }
 
     /**
-     * Actualiza el repartidor seleccionado
-     * en la tabla.
+     * Actualiza el repartidor seleccionado.
      */
     private void actualizarRepartidor() {
 
@@ -235,15 +228,7 @@ public class PanelRepartidores extends JPanel {
         String nombre =
                 txtNombre.getText().trim();
 
-        if (nombre.isEmpty()) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "El nombre del repartidor es obligatorio.",
-                    "Validación",
-                    JOptionPane.WARNING_MESSAGE
-            );
-
+        if (!validarNombre(nombre)) {
             return;
         }
 
@@ -280,7 +265,7 @@ public class PanelRepartidores extends JPanel {
     }
 
     /**
-     * Elimina de la BD el repartidor seleccionado.
+     * Elimina el repartidor seleccionado.
      */
     private void eliminarRepartidor() {
 
@@ -360,6 +345,43 @@ public class PanelRepartidores extends JPanel {
                         1
                 ).toString()
         );
+    }
+
+    /**
+     * Valida que el nombre sea obligatorio
+     * y compatible con VARCHAR(100) de la BD.
+     */
+    private boolean validarNombre(String nombre) {
+
+        if (nombre.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "El nombre del repartidor es obligatorio.",
+                    "Validación",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            txtNombre.requestFocus();
+
+            return false;
+        }
+
+        if (nombre.length() > 100) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "El nombre no puede superar 100 caracteres.",
+                    "Validación",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            txtNombre.requestFocus();
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
